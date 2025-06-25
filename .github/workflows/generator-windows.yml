@@ -51,7 +51,7 @@ on:
       extras:
         description: "extra inputs in json"
         required: true
-        default: '{"compname": "Mapleduck", "urlLink": "https://portal.mapleduck.com", "downloadLink": "https://portal.mapleduck.com/home/rustdesk.exe", "removeNewVersionNotif": "true"}'
+        default: '{"compname": "Mapleduck", "urlLink": "https://portal.mapleduck.com", "downloadLink": "https://portal.mapleduck.com/home/rustdesk.exe", "removeNewVersionNotif": "true", "version": "1.4.0"}'
         type: string
 
 
