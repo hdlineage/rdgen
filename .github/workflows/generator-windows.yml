@@ -10,12 +10,12 @@ on:
         type: string
       key:
         description: 'Public Key'
-        required: true
+        required: false
         default: ''
         type: string
       apiServer:
         description: 'API Server'
-        required: true
+        required: false
         default: ''
         type: string
       custom:
@@ -25,7 +25,7 @@ on:
         type: string
       uuid:
         description: "uuid of request"
-        required: true
+        required: false
         default: ''
         type: string
       iconlink:
@@ -40,7 +40,7 @@ on:
         type: string
       appname:
         description: "app name"
-        required: true
+        required: false
         default: 'rustdesk'
         type: string
       filename:
