@@ -4,8 +4,8 @@
 #secrets.EXTRAS
 #secrets.KEY
 #secrets.API
-#secrets.ICON
-#secrets.LOGO
+#inputs.iconlink
+#inputs.logolink
 #secrets.APPNAME
 #secrets.FILENAME
 
@@ -15,7 +15,22 @@ run-name: Custom Windows Client Generator
 on:
   workflow_dispatch:
     inputs:
-      
+      version:
+        description: 'version'
+        required: true
+        default: 'master'
+        type: string
+      iconlink:
+        description: "icon link"
+        required: false
+        default: 'false'
+        type: string
+      logolink:
+        description: "logo link"
+        required: false
+        default: 'false'
+        type: string
+        
 env:
   SCITER_RUST_VERSION: "1.75" # https://github.com/rustdesk/rustdesk/discussions/7503, also 1.78 has ABI change which causes our sciter version not working, https://blog.rust-lang.org/2024/03/30/i128-layout-update.html
   RUST_VERSION: "1.75" # sciter failed on m1 with 1.78 because of https://blog.rust-lang.org/2024/03/30/i128-layout-update.html
@@ -31,7 +46,7 @@ env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
   # vcpkg version: 2024.07.12
   VCPKG_COMMIT_ID: "460551b0ec06be1ba6b918448bf3b0f44add813d"
-  VERSION: "${{ fromJson(secrets.EXTRAS).version }}"
+  VERSION: "${{ inputs.version }}"
   NDK_VERSION: "r27c"
   #signing keys env variable checks
   ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
@@ -281,7 +296,7 @@ jobs:
         shell: bash
 
       - name: icon stuff
-        if: ${{ secrets.ICON != 'false' }}
+        if: ${{ inputs.iconlink != 'false' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -290,10 +305,10 @@ jobs:
           mv ./res/tray-icon.ico ./res/tray-icon.ico.bak
 
       - name: magick stuff
-        if: ${{ secrets.ICON != 'false' }}
+        if: ${{ inputs.iconlink != 'false' }}
         continue-on-error: true
         run: |
-          Invoke-WebRequest -Uri ${{ fromJson(secrets.ICON).url }}/get_png?filename=${{ fromJson(secrets.ICON).file }}"&"uuid=${{ fromJson(secrets.ICON).uuid }} -OutFile ./res/icon.png 
+          Invoke-WebRequest -Uri ${{ fromJson(inputs.iconlink).url }}/get_png?filename=${{ fromJson(inputs.iconlink).file }}"&"uuid=${{ fromJson(inputs.iconlink).uuid }} -OutFile ./res/icon.png 
           mv ./res/32x32.png ./res/32x32.png.bak
           mv ./res/64x64.png ./res/64x64.png.bak
           mv ./res/128x128.png ./res/128x128.png.bak
@@ -307,7 +322,7 @@ jobs:
 
 
       - name: ui.rs icon
-        if: ${{ secrets.ICON != 'false' }}
+        if: ${{ inputs.iconlink != 'false' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -364,7 +379,7 @@ jobs:
                 </security>' ./flutter/windows/runner/runner.exe.manifest
  
       - name: replace flutter icons
-        if: ${{ secrets.ICON != 'false' }}
+        if: ${{ inputs.iconlink != 'false' }}
         continue-on-error: true
         run: |
           cd ./flutter
@@ -414,17 +429,17 @@ jobs:
           }
 
       - name: icon stuff
-        if: ${{ secrets.ICON != 'false' }}
+        if: ${{ inputs.iconlink != 'false' }}
         continue-on-error: true
         run: |
           mv ./rustdesk/data/flutter_assets/assets/icon.svg ./rustdesk/data/flutter_assets/assets/icon.svg.bak
           magick ./res/icon.png ./rustdesk/data/flutter_assets/assets/icon.svg
 
       - name: logo stuff
-        if: ${{ secrets.LOGO != 'false' }}
+        if: ${{ inputs.logolink != 'false' }}
         continue-on-error: true
         run: |
-          Invoke-WebRequest -Uri ${{ fromJson(secrets.LOGO).url }}/get_png?filename=${{ fromJson(secrets.LOGO).file }}"&"uuid=${{ fromJson(secrets.LOGO).uuid }} -OutFile ./rustdesk/data/flutter_assets/assets/logo.png
+          Invoke-WebRequest -Uri ${{ fromJson(inputs.logolink).url }}/get_png?filename=${{ fromJson(inputs.logolink).file }}"&"uuid=${{ fromJson(inputs.logolink).uuid }} -OutFile ./rustdesk/data/flutter_assets/assets/logo.png
 
 
       - name: find Runner.res
