@@ -1,59 +1,16 @@
+#Available Settings as secrets
+#secrets.SERVER
+#secrets.CUSTOM
+#secrets.EXTRAS
+#secrets.KEY
+#secrets.API
+#secrets.ICON
+#secrets.LOGO
+#secrets.APPNAME
+#secrets.FILENAME
+
 name: Custom Windows Client Generator
 run-name: Custom Windows Client Generator
-on: 
-  workflow_dispatch:
-    inputs:
-      server:
-        description: 'Rendezvous Server'
-        required: true
-        default: 'rd.mapleduck.com'
-        type: string
-      key:
-        description: 'Public Key'
-        required: false
-        default: ''
-        type: string
-      apiServer:
-        description: 'API Server'
-        required: false
-        default: ''
-        type: string
-      custom:
-        description: "Custom JSON"
-        required: true
-        default: 'eyJkZWZhdWx0LXNldHRpbmdzIjogeyJhcHByb3ZlLW1vZGUiOiAiY2xpY2siLCAiYWxsb3ctcmVtb3RlLWNvbmZpZy1tb2RpZmljYXRpb24iOiAiWSJ9fQ=='
-        type: string
-      uuid:
-        description: "uuid of request"
-        required: false
-        default: ''
-        type: string
-      iconlink:
-        description: "icon link"
-        required: false
-        default: 'false'
-        type: string
-      logolink:
-        description: "logo link"
-        required: false
-        default: 'false'
-        type: string
-      appname:
-        description: "app name"
-        required: false
-        default: 'rustdesk'
-        type: string
-      filename:
-        description: "Filename"
-        required: true
-        default: 'RustDesk'
-        type: string
-      extras:
-        description: "extra inputs in json"
-        required: true
-        default: '{"compname": "Mapleduck", "urlLink": "https://portal.mapleduck.com", "downloadLink": "https://portal.mapleduck.com/home/rustdesk.exe", "removeNewVersionNotif": "true", "version": "1.4.0"}'
-        type: string
-
 
 env:
   SCITER_RUST_VERSION: "1.75" # https://github.com/rustdesk/rustdesk/discussions/7503, also 1.78 has ABI change which causes our sciter version not working, https://blog.rust-lang.org/2024/03/30/i128-layout-update.html
@@ -70,7 +27,7 @@ env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
   # vcpkg version: 2024.07.12
   VCPKG_COMMIT_ID: "460551b0ec06be1ba6b918448bf3b0f44add813d"
-  VERSION: "${{ fromJson(inputs.extras).version }}"
+  VERSION: "${{ fromJson(secrets.EXTRAS).version }}"
   NDK_VERSION: "r27c"
   #signing keys env variable checks
   ANDROID_SIGNING_KEY: "${{ secrets.ANDROID_SIGNING_KEY }}"
@@ -84,7 +41,7 @@ jobs:
   generate-bridge:
     uses: ./.github/workflows/bridge.yml
     with:
-      version: ${{ fromJson(inputs.extras).version }}
+      version: ${{ fromJson(secrets.EXTRAS).version }}
 
   build-RustDeskTempTopMostWindow:
     uses: ./.github/workflows/third-party-RustDeskTempTopMostWindow.yml
@@ -198,49 +155,49 @@ jobs:
           sed -i -e 's|reg delete HKEY_CLASSES_ROOT\\\\{ext} /f|reg delete \\\"HKEY_CLASSES_ROOT\\\\{ext}\\\" /f|' ./src/platform/windows.rs
           
       - name: change company name
-        if: fromJson(inputs.extras).compname != 'Purslane Ltd'
+        if: fromJson(secrets.EXTRAS).compname != 'Purslane Ltd'
         continue-on-error: true
         shell: bash
         run: |
-          sed -i -e 's|Purslane Ltd|${{ fromJson(inputs.extras).compname }}|' ./flutter/lib/desktop/pages/desktop_setting_page.dart
-          sed -i -e 's|Purslane Ltd.|${{ fromJson(inputs.extras).compname }}|' ./res/setup.nsi
-          sed -i -e 's|PURSLANE|${{ fromJson(inputs.extras).compname }}|' ./res/msi/preprocess.py
-          sed -i -e 's|Purslane Ltd|${{ fromJson(inputs.extras).compname }}|' ./res/msi/preprocess.py
-          sed -i -e 's|"Copyright © 2025 Purslane Ltd. All rights reserved."|"Copyright © 2025 ${{ fromJson(inputs.extras).compname }}. All rights reserved."|' ./flutter/windows/runner/Runner.rc
-          sed -i -e 's|Purslane Ltd|${{ fromJson(inputs.extras).compname }}|' ./flutter/windows/runner/Runner.rc
-          sed -i -e 's|Purslane Ltd|${{ fromJson(inputs.extras).compname }}|' ./Cargo.toml
-          sed -i -e 's|Purslane Ltd|${{ fromJson(inputs.extras).compname }}|' ./libs/portable/Cargo.toml
+          sed -i -e 's|Purslane Ltd|${{ fromJson(secrets.EXTRAS).compname }}|' ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e 's|Purslane Ltd.|${{ fromJson(secrets.EXTRAS).compname }}|' ./res/setup.nsi
+          sed -i -e 's|PURSLANE|${{ fromJson(secrets.EXTRAS).compname }}|' ./res/msi/preprocess.py
+          sed -i -e 's|Purslane Ltd|${{ fromJson(secrets.EXTRAS).compname }}|' ./res/msi/preprocess.py
+          sed -i -e 's|"Copyright © 2025 Purslane Ltd. All rights reserved."|"Copyright © 2025 ${{ fromJson(secrets.EXTRAS).compname }}. All rights reserved."|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|Purslane Ltd|${{ fromJson(secrets.EXTRAS).compname }}|' ./flutter/windows/runner/Runner.rc
+          sed -i -e 's|Purslane Ltd|${{ fromJson(secrets.EXTRAS).compname }}|' ./Cargo.toml
+          sed -i -e 's|Purslane Ltd|${{ fromJson(secrets.EXTRAS).compname }}|' ./libs/portable/Cargo.toml
              
       - name: change url to custom
-        if: fromJson(inputs.extras).urlLink != 'https://rustdesk.com'
+        if: fromJson(secrets.EXTRAS).urlLink != 'https://rustdesk.com'
         continue-on-error: true
         shell: bash
         run: |
-          sed -i -e 's|Homepage: https://rustdesk.com|Homepage: ${{ fromJson(inputs.extras).urlLink }}|' ./build.py
-          sed -i -e "s|launchUrl(Uri.parse('https://rustdesk.com'));|launchUrl(Uri.parse('${{ fromJson(inputs.extras).urlLink }}'));|" ./flutter/lib/common.dart
-          sed -i -e "s|launchUrlString('https://rustdesk.com');|launchUrlString('${{ fromJson(inputs.extras).urlLink }}');|" ./flutter/lib/desktop/pages/desktop_setting_page.dart
-          sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('${{ fromJson(inputs.extras).urlLink }}/privacy.html')|" ./flutter/lib/desktop/pages/desktop_setting_page.dart
-          sed -i -e "s|const url = 'https://rustdesk.com/';|const url = '${{ fromJson(inputs.extras).urlLink }}';|" ./flutter/lib/mobile/pages/settings_page.dart
-          sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('${{ fromJson(inputs.extras).urlLink }}/privacy.html')|" ./flutter/lib/mobile/pages/settings_page.dart
-          sed -i -e "s|https://rustdesk.com/privacy.html|${{ fromJson(inputs.extras).urlLink }}/privacy.html|" ./flutter/lib/desktop/pages/install_page.dart
-          sed -i -e "s|https://rustdesk.com/|${{fromJson(inputs.extras).urlLink }}|" ./res/setup.nsi
+          sed -i -e 's|Homepage: https://rustdesk.com|Homepage: ${{ fromJson(secrets.EXTRAS).urlLink }}|' ./build.py
+          sed -i -e "s|launchUrl(Uri.parse('https://rustdesk.com'));|launchUrl(Uri.parse('${{ fromJson(secrets.EXTRAS).urlLink }}'));|" ./flutter/lib/common.dart
+          sed -i -e "s|launchUrlString('https://rustdesk.com');|launchUrlString('${{ fromJson(secrets.EXTRAS).urlLink }}');|" ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('${{ fromJson(secrets.EXTRAS).urlLink }}/privacy.html')|" ./flutter/lib/desktop/pages/desktop_setting_page.dart
+          sed -i -e "s|const url = 'https://rustdesk.com/';|const url = '${{ fromJson(secrets.EXTRAS).urlLink }}';|" ./flutter/lib/mobile/pages/settings_page.dart
+          sed -i -e "s|launchUrlString('https://rustdesk.com/privacy.html')|launchUrlString('${{ fromJson(secrets.EXTRAS).urlLink }}/privacy.html')|" ./flutter/lib/mobile/pages/settings_page.dart
+          sed -i -e "s|https://rustdesk.com/privacy.html|${{ fromJson(secrets.EXTRAS).urlLink }}/privacy.html|" ./flutter/lib/desktop/pages/install_page.dart
+          sed -i -e "s|https://rustdesk.com/|${{fromJson(secrets.EXTRAS).urlLink }}|" ./res/setup.nsi
 
       - name: change download link to custom
-        if: fromJson(inputs.extras).downloadLink != 'https://rustdesk.com/download'
+        if: fromJson(secrets.EXTRAS).downloadLink != 'https://rustdesk.com/download'
         continue-on-error: true
         shell: bash
         run: |
-          sed -i -e 's|https://rustdesk.com/download|${{ fromJson(inputs.extras).downloadLink }}|' ./flutter/lib/desktop/pages/desktop_home_page.dart
-          sed -i -e 's|https://rustdesk.com/download|${{ fromJson(inputs.extras).downloadLink }}|' ./flutter/lib/mobile/pages/connection_page.dart
-          sed -i -e 's|https://rustdesk.com/download|${{ fromJson(inputs.extras).downloadLink }}|' ./src/ui/index.tis
+          sed -i -e 's|https://rustdesk.com/download|${{ fromJson(secrets.EXTRAS).downloadLink }}|' ./flutter/lib/desktop/pages/desktop_home_page.dart
+          sed -i -e 's|https://rustdesk.com/download|${{ fromJson(secrets.EXTRAS).downloadLink }}|' ./flutter/lib/mobile/pages/connection_page.dart
+          sed -i -e 's|https://rustdesk.com/download|${{ fromJson(secrets.EXTRAS).downloadLink }}|' ./src/ui/index.tis
 
       - name: set server, key, and apiserver
         continue-on-error: true
         shell: bash
         run: |
-          sed -i -e 's|rs-ny.rustdesk.com|${{ inputs.server }}|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|${{ inputs.key }}|' ./libs/hbb_common/src/config.rs
-          sed -i -e 's|https://admin.rustdesk.com|${{ inputs.apiServer }}|' ./src/common.rs
+          sed -i -e 's|rs-ny.rustdesk.com|${{ secrets.SERVER }}|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|${{ secrets.KEY }}|' ./libs/hbb_common/src/config.rs
+          sed -i -e 's|https://admin.rustdesk.com|${{ secrets.API }}|' ./src/common.rs
           # ./flutter/pubspec.yaml
           #sed -i '/intl:/a \ \ archive: ^3.6.1' ./flutter/pubspec.yaml
 
@@ -320,7 +277,7 @@ jobs:
         shell: bash
 
       - name: icon stuff
-        if: ${{ inputs.iconlink != 'false' }}
+        if: ${{ secrets.ICON != 'false' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -329,10 +286,10 @@ jobs:
           mv ./res/tray-icon.ico ./res/tray-icon.ico.bak
 
       - name: magick stuff
-        if: ${{ inputs.iconlink != 'false' }}
+        if: ${{ secrets.ICON != 'false' }}
         continue-on-error: true
         run: |
-          Invoke-WebRequest -Uri ${{ fromJson(inputs.iconlink).url }}/get_png?filename=${{ fromJson(inputs.iconlink).file }}"&"uuid=${{ fromJson(inputs.iconlink).uuid }} -OutFile ./res/icon.png 
+          Invoke-WebRequest -Uri ${{ fromJson(secrets.ICON).url }}/get_png?filename=${{ fromJson(secrets.ICON).file }}"&"uuid=${{ fromJson(secrets.ICON).uuid }} -OutFile ./res/icon.png 
           mv ./res/32x32.png ./res/32x32.png.bak
           mv ./res/64x64.png ./res/64x64.png.bak
           mv ./res/128x128.png ./res/128x128.png.bak
@@ -346,7 +303,7 @@ jobs:
 
 
       - name: ui.rs icon
-        if: ${{ inputs.iconlink != 'false' }}
+        if: ${{ secrets.ICON != 'false' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -357,35 +314,35 @@ jobs:
 
       - name: fix connection delay
         continue-on-error: true
-        if: ${{ fromJson(inputs.extras).delayFix == 'true' }}
+        if: ${{ fromJson(secrets.EXTRAS).delayFix == 'true' }}
         shell: bash
         run: |
           sed -i -e '/if !key.is_empty() && !token.is_empty() {/,/^\s*}/d' ./src/client.rs
 
       - name: add cycle monitors to toolbar
         continue-on-error: true
-        if: fromJson(inputs.extras).cycleMonitor == 'true'
+        if: fromJson(secrets.EXTRAS).cycleMonitor == 'true'
         run: |
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/cycle_monitor.diff -OutFile cycle_monitor.diff
           git apply cycle_monitor.diff
 
       - name: use X for offline display instead of orange circle
         continue-on-error: true
-        if: fromJson(inputs.extras).xOffline == 'true'
+        if: fromJson(secrets.EXTRAS).xOffline == 'true'
         run: |
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/xoffline.diff -OutFile xoffline.diff
           git apply xoffline.diff
 
       - name: hide-cm
         continue-on-error: true
-        if: fromJson(inputs.extras).hidecm == 'true'
+        if: fromJson(secrets.EXTRAS).hidecm == 'true'
         run: |
           Invoke-WebRequest -Uri https://raw.githubusercontent.com/bryangerlach/rdgen/refs/heads/master/.github/patches/hidecm.diff -OutFile hidecm.diff
           git apply hidecm.diff
 
       - name: removeNewVersionNotif
         continue-on-error: true
-        if: fromJson(inputs.extras).removeNewVersionNotif == 'true'
+        if: fromJson(secrets.EXTRAS).removeNewVersionNotif == 'true'
         shell: bash
         run: | 
           sed -i -e 's|updateUrl.isNotEmpty|false|' ./flutter/lib/desktop/pages/desktop_home_page.dart
@@ -394,7 +351,7 @@ jobs:
 
       - name: run as admin
         continue-on-error: true
-        if: ${{ fromJson(inputs.extras).runasadmin == 'true' }}
+        if: ${{ fromJson(secrets.EXTRAS).runasadmin == 'true' }}
         shell: bash
         run: |
           sed -i '/<\/compatibility>/a \
@@ -403,7 +360,7 @@ jobs:
                 </security>' ./flutter/windows/runner/runner.exe.manifest
  
       - name: replace flutter icons
-        if: ${{ inputs.iconlink != 'false' }}
+        if: ${{ secrets.ICON != 'false' }}
         continue-on-error: true
         run: |
           cd ./flutter
@@ -453,17 +410,17 @@ jobs:
           }
 
       - name: icon stuff
-        if: ${{ inputs.iconlink != 'false' }}
+        if: ${{ secrets.ICON != 'false' }}
         continue-on-error: true
         run: |
           mv ./rustdesk/data/flutter_assets/assets/icon.svg ./rustdesk/data/flutter_assets/assets/icon.svg.bak
           magick ./res/icon.png ./rustdesk/data/flutter_assets/assets/icon.svg
 
       - name: logo stuff
-        if: ${{ inputs.logolink != 'false' }}
+        if: ${{ secrets.LOGO != 'false' }}
         continue-on-error: true
         run: |
-          Invoke-WebRequest -Uri ${{ fromJson(inputs.logolink).url }}/get_png?filename=${{ fromJson(inputs.logolink).file }}"&"uuid=${{ fromJson(inputs.logolink).uuid }} -OutFile ./rustdesk/data/flutter_assets/assets/logo.png
+          Invoke-WebRequest -Uri ${{ fromJson(secrets.LOGO).url }}/get_png?filename=${{ fromJson(secrets.LOGO).file }}"&"uuid=${{ fromJson(secrets.LOGO).uuid }} -OutFile ./rustdesk/data/flutter_assets/assets/logo.png
 
 
       - name: find Runner.res
@@ -521,7 +478,7 @@ jobs:
       - name: Create custom.txt file
         shell: bash
         run: |
-          echo -n "${{ inputs.custom }}" | cat > ./rustdesk/custom.txt
+          echo -n "${{ secrets.CUSTOM }}" | cat > ./rustdesk/custom.txt
         
 
       - name: Build self-extracted executable
