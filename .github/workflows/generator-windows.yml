@@ -10,11 +10,6 @@ run-name: Custom Windows Client Generator
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'version'
-        required: true
-        default: 'master'
-        type: string
       appname:
         description: "app name"
         required: true
