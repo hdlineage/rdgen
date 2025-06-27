@@ -528,7 +528,8 @@ jobs:
           cp "../../rustdesk/${{ inputs.appname }}.exe" "../../rustdesk/${myappname}.exe" -ErrorAction SilentlyContinue
           pushd ./res/msi
           python preprocess.py --app-name "$myappname" --arp -d ../../rustdesk
-          VERSION=1.4.0 nuget restore msi.sln
+          $env:VERSION = "1.4.0"
+          nuget restore msi.sln
           msbuild msi.sln -p:Configuration=Release -p:Platform=x64 /p:TargetVersion=Windows10
           cp ./Package/bin/x64/Release/en-us/Package.msi ../../SignOutput/rustdesk-latest.msi
           mv ./Package/bin/x64/Release/en-us/Package.msi ../../SignOutput/rustdesk.msi
