@@ -502,7 +502,22 @@ jobs:
         shell: bash
         run: |
           echo -n "${{ secrets.CUSTOM }}" | cat > ./rustdesk/custom.txt
-        
+
+
+      - name: zip files
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./rustdesk/* -DestinationPath ./rustdesk/unsigned_files.zip -CompressionLevel Fastest
+      
+      
+      - name: Upload unsigned files as artifact
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: rustdesk.exe
+          path: ./rustdesk/unsigned_files.zip
+
 
       - name: Build self-extracted executable
         shell: bash
