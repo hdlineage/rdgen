@@ -515,7 +515,7 @@ jobs:
         uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
-          name: rustdesk.exe
+          name: unsigned_files.zip
           path: ./rustdesk/unsigned_files.zip
 
 
